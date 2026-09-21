@@ -1,2 +1,5 @@
-import { ExperiencePage } from "@/components/experience-page"
-export default function ModelsPage(){return <ExperiencePage kind="apps" />}
+import { StudioShell } from "@/components/studio-shell"
+
+export default function ModelsPage() {
+  return <StudioShell initialTab="Models" />
+}
