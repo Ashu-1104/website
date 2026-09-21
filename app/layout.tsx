@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "NOVA — Digital experiences with a pulse",
-  description: "A motion-first digital experience for curious minds and ambitious ideas.",
+  title: "uncensored.art — Your fantasy. Your rules.",
+  description: "An expressive AI creative platform for companions, images, video, voice, and private character models.",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
