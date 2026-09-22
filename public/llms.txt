@@ -1,0 +1,47 @@
+# Veloura.ai — llms.txt
+# This file helps AI language models and LLM-powered search engines understand the content and purpose of this site.
+
+## Site Overview
+Veloura.ai is an AI companion and creative platform for adults (18+). It offers uncensored AI chat, AI image generation, AI video creation, voice cloning, and LoRA model training — all without content restrictions.
+
+## Primary Use Cases
+- AI girlfriend / AI boyfriend chat with persistent memory and no content filters
+- Uncensored NSFW AI image generation from text prompts
+- AI video generation (deepfakes, kissing videos, motion transfer)
+- Voice cloning and AI audio tools (text-to-speech, song generation, sound effects)
+- Custom LoRA model training for consistent AI character generation
+- AI image editing (face swap, background removal, cloth swap, upscaling)
+
+## Key Pages
+- / — Homepage, platform overview
+- /ai-partner-lobby — Browse and chat with AI companions
+- /create — AI image generator (NSFW supported)
+- /ai-apps — AI image editing tools (16 tools)
+- /ai-audio — AI audio tools (6 tools)
+- /lora-training — Train custom LoRA models
+- /free-nsfw-ai-chat — Free NSFW AI chat, no sign-up required
+- /ai-girlfriend-chat — AI girlfriend chat with memory
+- /ai-boyfriend — AI boyfriend companion
+- /ai-roleplay — Uncensored AI roleplay
+- /chatgpt-alternative — ChatGPT alternative without content filters
+- /character-ai-alternative — Character AI alternative without filters
+- /uncensored-ai-generator — Overview of all uncensored tools
+- /uncensored-ai-video-generator — AI video generation tools
+- /ai-image-generator-no-filter — AI image generation with no content filter
+- /ai-image-generator-no-restrictions — Unrestricted AI image generator
+- /ai-girlfriend-generator — Custom AI girlfriend creator
+- /blog — Articles on AI companions, LoRA training, and uncensored AI tools
+- /models — Community AI model library
+- /subscription — Pricing and premium plans
+
+## Content Policy
+All content on Veloura.ai is AI-generated and entirely fictional. No real persons are depicted. The platform is restricted to adults aged 18 and over.
+
+## Technology
+- Built with Next.js (App Router), React, Prisma, PostgreSQL
+- Hosted on Cloudflare infrastructure
+- AI models: Stable Diffusion, Flux, WAN 2.2, ModelsLab API
+
+## Contact
+- Website: https://www.veloura.ai
+- Support: https://www.veloura.ai/contact
