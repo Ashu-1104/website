@@ -1,0 +1,80 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# User uploads (dev/demo)
+public/uploads/
+
+# Production
+build/
+dist/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+/generated/prisma
+
+# Internal Python scripts (model upload & data scraping)
+cleanup_models.py
+discover_darlink.py
+discover_darlink2.py
+investigate_luna.py
+model_matcher.py
+model_upload.py
+__pycache__/
+*.pyc
+*.pyo
+
+# Scraper & browser automation
+scraper/
+
+# Internal agent utilities
+agents/
+
+# Bulk seed/data-upload scripts
+prisma/seed-ai-filters.js
+prisma/seed-plans.js
+prisma/seed-video-models.js
+
+# Internal reports & analysis docs
+site-report.txt
+CODEBASE_ANALYSIS_REPORT.md
+PERFORMANCE_REPORT.md
+PERFORMANCE_REPORT_V2.md
+VERIFIED_BLOAT_REPORT.md
+PRICING_STRATEGY.md
+QA_TESTING_PROMPT.md
+QA_TEST_REPORT.md
+
+# Internal env files
+.env.model-upload
+
+# Claude Code local settings
+.claude/
+
+# Database dumps — never commit, contains user data
+*.sql
+*.sql.bak
+prisma.config.ts.bak

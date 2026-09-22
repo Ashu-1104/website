@@ -1,0 +1,592 @@
+.composerWrap {
+  position: relative;
+  overflow: visible;
+}
+
+/* Override chat-composer to be column layout for DM composer with attachments */
+.composerWrap :global(.chat-composer) {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.toastWrap {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  z-index: 80;
+}
+
+.toast {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 26, 0.92);
+  backdrop-filter: blur(14px);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+
+.attachWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.attachTrigger {
+  position: relative;
+}
+
+.attachTriggerActive {
+  background: rgba(255, 62, 138, 0.14);
+  border-color: rgba(255, 62, 138, 0.35);
+  color: var(--accent-pink);
+}
+
+.attachTrigger:focus-visible {
+  outline: 2px solid rgba(255, 62, 138, 0.65);
+  outline-offset: 2px;
+}
+
+.attachMenu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 12px);
+  width: 260px;
+  max-width: min(92vw, 360px);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 26, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  padding: 10px 8px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.attachMenuItem {
+  width: 100%;
+  text-align: left;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.attachMenuItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.attachMenuItem:focus-visible {
+  outline: 2px solid rgba(255, 62, 138, 0.65);
+  outline-offset: 2px;
+}
+
+.attachMenuIcon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.attachMenuIconPhotos {
+  color: rgba(59, 130, 246, 0.95);
+}
+
+.attachMenuIconAudio {
+  color: rgba(249, 115, 22, 0.95);
+}
+
+.attachMenuIconAi {
+  color: var(--accent-pink);
+}
+
+.attachMenuIconGif {
+  color: rgba(168, 85, 247, 0.95);
+}
+
+.attachMenuIconNsfw {
+  color: rgba(248, 113, 113, 0.95);
+}
+
+.imageWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.imageTrigger {
+  position: relative;
+}
+
+.imageTriggerActive {
+  background: rgba(255, 62, 138, 0.14);
+  border-color: rgba(255, 62, 138, 0.35);
+  color: var(--accent-pink);
+}
+
+.imageTrigger:focus-visible {
+  outline: 2px solid rgba(255, 62, 138, 0.65);
+  outline-offset: 2px;
+}
+
+.imageMenu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 26, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  z-index: 60;
+}
+
+.imageOption {
+  position: relative;
+  width: 85px;
+  height: 85px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: rgba(255, 255, 255, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.imageOption:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.imageOptionSelected {
+  border-color: rgba(255, 62, 138, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 62, 138, 0.3);
+}
+
+.imageOption:focus-visible {
+  outline: 2px solid rgba(255, 62, 138, 0.65);
+  outline-offset: 2px;
+}
+
+.imageOptionLabel {
+  width: 100%;
+  padding: 8px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  line-height: 1.1;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.5) 60%, transparent);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.askWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.askTrigger {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 650;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.askTrigger:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.askTrigger:active {
+  transform: translateY(0);
+}
+
+.askTriggerOpen {
+  background: rgba(255, 62, 138, 0.14);
+  border-color: rgba(255, 62, 138, 0.35);
+}
+
+.askTrigger:focus-visible {
+  outline: 2px solid rgba(255, 62, 138, 0.65);
+  outline-offset: 2px;
+}
+
+.askIcon {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.askLabel {
+  line-height: 1;
+}
+
+.askChevron {
+  width: 16px;
+  height: 16px;
+  opacity: 0.9;
+  transition: transform 0.15s ease;
+}
+
+.askChevronOpen {
+  transform: rotate(180deg);
+}
+
+.askMenu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  width: 240px;
+  max-width: min(92vw, 360px);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 26, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  padding: 14px 0;
+  z-index: 60;
+}
+
+.askMenuHeader {
+  padding: 6px 18px 12px 18px;
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.askMenuList {
+  display: flex;
+  flex-direction: column;
+}
+
+.askMenuItem {
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.askMenuItem + .askMenuItem {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.askMenuItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.askMenuItem:focus-visible {
+  outline: 2px solid rgba(255, 62, 138, 0.65);
+  outline-offset: -2px;
+}
+
+.attachMenuBack {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.15s ease;
+}
+
+.attachMenuBack:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.attachMenuBackIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.imageStyleGrid {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+}
+
+.editContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
+}
+
+.editImagePreview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.editImagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.editImageRemove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.editImageRemove:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.editPromptInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.editPromptInput:focus {
+  border-color: rgba(255, 62, 138, 0.5);
+}
+
+.editPromptInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.editSubmitBtn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, rgba(255, 62, 138, 0.9), rgba(200, 50, 110, 0.9));
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.editSubmitBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.editSubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.styleSelectedBadge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 62, 138, 0.2), rgba(200, 50, 110, 0.2));
+  border: 1px solid rgba(255, 62, 138, 0.4);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.composerAttachment {
+  padding: 12px 12px 8px 12px;
+  width: 100%;
+}
+
+.attachmentPreview {
+  position: relative;
+  display: inline-block;
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.attachmentPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attachmentActions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+}
+
+.attachmentRemove {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.attachmentRemove:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+.attachmentRemoveIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.attachmentLabel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 8px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+}
+
+.composerInputRow {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  gap: 12px;
+}
+
+.aiImageStylePreview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 62, 138, 0.2), rgba(200, 50, 110, 0.2));
+}
+
+.aiImageStyleIcon {
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 62, 138, 0.8);
+}
+
+.composerModeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 6px 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  width: fit-content;
+}
+
+.modeBadgeIcon {
+  width: 16px;
+  height: 16px;
+  color: #7ab8ff;
+}
+
+.modeBadgeText {
+  font-size: 13px;
+  font-weight: 500;
+  color: #7ab8ff;
+}
+
+.modeBadgeClose {
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modeBadgeClose:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.modeBadgeCloseIcon {
+  width: 14px;
+  height: 14px;
+}

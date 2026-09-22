@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: Arush
+      POSTGRES_PASSWORD: ArushPassword123
+      POSTGRES_DB: vp
+    ports:
+      - "5432:5432"
+    volumes:
+      - vp_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  vp_postgres_data:
+

@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+node_modules
+socket-server/node_modules
+socket-server/dist
+.next
+npm-debug.log*
+*.md
+.claude
+scraper
+agents
+__pycache__
+*.pyc
+*.py

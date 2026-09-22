@@ -1,0 +1,1044 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model AIApp {
+  id              String     @id @default(uuid()) @db.Uuid
+  slug            String     @unique
+  label           String
+  description     String
+  longDescription String?
+  thumbnailUrl    String
+  bannerUrl       String?
+  category        String?
+  creditCost      Int        @default(10)
+  isActive        Boolean    @default(true)
+  isNsfw          Boolean    @default(false)
+  isFeatured      Boolean    @default(false)
+  sortOrder       Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  config          Json?
+  likeCount       Int        @default(0)
+  favoriteCount   Int        @default(0)
+  usageCount      Int        @default(0)
+  favorites       Favorite[]
+  likes           Like[]
+
+  @@index([category])
+  @@index([favoriteCount])
+  @@index([isActive, sortOrder])
+  @@index([isFeatured])
+  @@index([likeCount])
+  @@index([slug])
+}
+
+model AICharacter {
+  id            String          @id @default(uuid()) @db.Uuid
+  userId        String          @db.Uuid
+  userEmail     String?
+  name          String
+  description   String?
+  metadata      Json?
+  avatarAssetId String?         @db.Uuid
+  characterAvatarUrl String?
+  avatarUrls    String[]        @default([])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  age           Int             @default(18)
+  bodyType      BodyType?
+  breastSize    BreastSize?
+  buttSize      ButtSize?
+  ethnicity     Ethnicity?
+  favoriteCount Int             @default(0)
+  firstMessage  String?
+  gender        CharacterGender @default(FEMALE)
+  isNsfw        Boolean         @default(false)
+  likeCount     Int             @default(0)
+  style         CharacterStyle  @default(REALISTIC)
+  systemPrompt  String?
+  tags          String[]        @default([])
+  usageCount    Int             @default(0)
+  visibility    String          @default("PUBLIC")
+  voiceId       String?
+  voiceUrl      String?
+  creationMode  String?
+  loraModelId   String?         @db.Uuid
+  avatarAsset   MediaAsset?     @relation("CharacterAvatar", fields: [avatarAssetId], references: [id], onDelete: SetNull)
+  loraModel     UserUploadedModel? @relation("CharacterLora", fields: [loraModelId], references: [id], onDelete: SetNull)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threads       ChatThread[]
+  favorites     Favorite[]
+  likes         Like[]
+
+  @@index([createdAt])
+  @@index([loraModelId])
+  @@index([favoriteCount])
+  @@index([gender])
+  @@index([isNsfw])
+  @@index([likeCount])
+  @@index([name])
+  @@index([style])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([visibility])
+}
+
+model ChatMessage {
+  id         String          @id @default(uuid()) @db.Uuid
+  threadId   String          @db.Uuid
+  role       ChatMessageRole
+  content    String
+  metadata   Json?
+  isEdited   Boolean         @default(false)
+  isDeleted  Boolean         @default(false)
+  editedAt   DateTime?
+  createdAt  DateTime        @default(now())
+  thread     ChatThread      @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@index([threadId, role])
+}
+
+model ChatThread {
+  id                 String        @id @default(uuid()) @db.Uuid
+  userId             String        @db.Uuid
+  characterId        String        @db.Uuid
+  lastMessageAt      DateTime      @default(now())
+  lastMessagePreview String?       @db.VarChar(100)
+  unreadCount        Int           @default(0)
+  isPinned           Boolean       @default(false)
+  isArchived         Boolean       @default(false)
+  isMuted            Boolean       @default(false)
+  characterName      String?
+  characterAvatarUrl String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  messages           ChatMessage[]
+  character          AICharacter   @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, characterId])
+  @@index([characterId])
+  @@index([userId, isArchived])
+  @@index([userId, isPinned, lastMessageAt])
+  @@index([userId, lastMessageAt])
+}
+
+model CommunityFeedCheckpointModel {
+  id                   String             @id @default(uuid()) @db.Uuid
+  itemId               String             @db.Uuid
+  modelId              String?            @db.Uuid
+  externalModelName    String?
+  externalModelVersion String?
+  externalModelUrl     String?
+  item                 CommunityFeedItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  model                UserUploadedModel? @relation(fields: [modelId], references: [id])
+
+  @@index([itemId])
+  @@index([modelId])
+}
+
+model CommunityFeedComment {
+  id                String            @id @default(uuid()) @db.Uuid
+  itemId            String            @db.Uuid
+  userId            String            @db.Uuid
+  body              String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  item              CommunityFeedItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model CommunityFeedItem {
+  id                           String                        @id @default(uuid()) @db.Uuid
+  userId                       String                        @db.Uuid
+  assetId                      String                        @db.Uuid
+  prompt                       String?
+  negativePrompt               String?
+  seed                         String?
+  sampler                      String?
+  checkpointName               String?
+  checkpointVersion            String?
+  checkpointThumbnailKey       String?
+  caption                      String?
+  createdAt                    DateTime                      @default(now())
+  updatedAt                    DateTime                      @updatedAt
+  commentCount                 Int                           @default(0)
+  likeCount                    Int                           @default(0)
+  videoGenerationType          VideoGenerationType?
+  videoStyle                   String?
+  videoSubCategory             String?
+  checkpointModels             CommunityFeedCheckpointModel[]
+  comments                     CommunityFeedComment[]
+  asset                        MediaAsset                    @relation(fields: [assetId], references: [id])
+  user                         User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loras                        CommunityFeedItemLora[]
+  reactions                    CommunityFeedReaction[]
+  favorites                    Favorite[]
+  likes                        Like[]
+
+  @@index([assetId])
+  @@index([createdAt, id])
+  @@index([likeCount])
+  @@index([userId, createdAt])
+  @@index([videoGenerationType])
+}
+
+model CommunityFeedItemLora {
+  id                String             @id @default(uuid()) @db.Uuid
+  itemId            String             @db.Uuid
+  modelId           String?            @db.Uuid
+  name              String
+  version           String?
+  thumbnailKey      String?
+  weight            Float?
+  item              CommunityFeedItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  model             UserUploadedModel? @relation(fields: [modelId], references: [id])
+
+  @@index([itemId])
+  @@index([modelId])
+}
+
+model CommunityFeedReaction {
+  userId            String            @db.Uuid
+  itemId            String            @db.Uuid
+  emoji             String
+  createdAt         DateTime          @default(now())
+  item              CommunityFeedItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, itemId, emoji])
+  @@index([itemId, emoji])
+  @@index([itemId])
+}
+
+model Decoration {
+  id             String           @id @default(uuid()) @db.Uuid
+  name           String
+  description    String?
+  type           DecorationType
+  imageUrl       String
+  cssClass       String?
+  isPremium      Boolean          @default(false)
+  price          Int?
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  userDecorations UserDecoration[]
+
+  @@index([isPremium])
+  @@index([type])
+}
+
+model SidebarLogoVideo {
+  id        String   @id @default(uuid()) @db.Uuid
+  videoUrl  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, createdAt])
+}
+
+model Favorite {
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @db.Uuid
+  type              FavoriteType
+  mediaAssetId      String?            @db.Uuid
+  modelId           String?            @db.Uuid
+  characterId       String?            @db.Uuid
+  communityItemId   String?            @db.Uuid
+  createdAt         DateTime           @default(now())
+  aiAppId           String?            @db.Uuid
+  styleTemplateId   String?            @db.Uuid
+  videoTemplateId   String?            @db.Uuid
+  aiApp             AIApp?             @relation(fields: [aiAppId], references: [id], onDelete: Cascade)
+  character         AICharacter?       @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  communityItem     CommunityFeedItem? @relation(fields: [communityItemId], references: [id], onDelete: Cascade)
+  mediaAsset        MediaAsset?        @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  model             UserUploadedModel? @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  styleTemplate     StyleTemplate?     @relation(fields: [styleTemplateId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoTemplate     VideoTemplate?     @relation(fields: [videoTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, aiAppId])
+  @@unique([userId, type, characterId])
+  @@unique([userId, type, communityItemId])
+  @@unique([userId, type, mediaAssetId])
+  @@unique([userId, type, modelId])
+  @@unique([userId, type, styleTemplateId])
+  @@unique([userId, type, videoTemplateId])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([userId, type])
+}
+
+model Follow {
+  id          String       @id @default(uuid()) @db.Uuid
+  followerId  String       @db.Uuid
+  followingId String       @db.Uuid
+  createdAt   DateTime     @default(now())
+  status      FollowStatus @default(ACCEPTED)
+  follower    User         @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User         @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followerId, status])
+  @@index([followerId, createdAt])
+  @@index([followingId])
+  @@index([followingId, status])
+  @@index([followingId, createdAt])
+}
+
+model GenerationJob {
+  id                String      @id @default(uuid()) @db.Uuid
+  userId            String?     @db.Uuid
+  trackId           Int         @unique @default(autoincrement())
+  externalId        String?
+  provider          JobProvider
+  jobType           JobType
+  status            JobStatus   @default(PENDING)
+  requestData       Json?
+  responseData      Json?
+  resultUrl         String?
+  errorMessage      String?
+  errorCode         String?
+  progress          Int?
+  eta               Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  startedAt         DateTime?
+  completedAt       DateTime?
+  webhookReceivedAt DateTime?
+  webhookPayload    Json?
+  user              User?       @relation(fields: [userId], references: [id])
+  userMedia         UserMedia[]
+
+  @@index([provider, externalId])
+  @@index([status, createdAt])
+  @@index([trackId])
+  @@index([userId, createdAt])
+  @@index([userId, status, createdAt])
+}
+
+model Like {
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @db.Uuid
+  type              LikeType
+  characterId       String?            @db.Uuid
+  communityItemId   String?            @db.Uuid
+  modelId           String?            @db.Uuid
+  aiAppId           String?            @db.Uuid
+  styleTemplateId   String?            @db.Uuid
+  videoTemplateId   String?            @db.Uuid
+  createdAt         DateTime           @default(now())
+  aiApp             AIApp?             @relation(fields: [aiAppId], references: [id], onDelete: Cascade)
+  character         AICharacter?       @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  communityItem     CommunityFeedItem? @relation(fields: [communityItemId], references: [id], onDelete: Cascade)
+  model             UserUploadedModel? @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  styleTemplate     StyleTemplate?     @relation(fields: [styleTemplateId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoTemplate     VideoTemplate?     @relation(fields: [videoTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, aiAppId])
+  @@unique([userId, type, characterId])
+  @@unique([userId, type, communityItemId])
+  @@unique([userId, type, modelId])
+  @@unique([userId, type, styleTemplateId])
+  @@unique([userId, type, videoTemplateId])
+  @@index([aiAppId])
+  @@index([characterId])
+  @@index([communityItemId])
+  @@index([createdAt])
+  @@index([modelId])
+  @@index([userId, type])
+}
+
+model MediaAsset {
+  id                String              @id @default(uuid()) @db.Uuid
+  type              MediaType
+  r2Key             String
+  width             Int
+  height            Int
+  durationSeconds   Int?
+  posterKey         String?
+  previewKey        String?
+  blurDataUrl       String?
+  mimeType          String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  characterAvatars  AICharacter[]       @relation("CharacterAvatar")
+  communityItems    CommunityFeedItem[]
+  favorites         Favorite[]
+  userMediaItems    UserMedia[]
+}
+
+model ModelThumbnail {
+  id                String            @id @default(uuid()) @db.Uuid
+  modelId           String            @db.Uuid
+  imageUrl          String
+  sortOrder         Int               @default(0)
+  createdAt         DateTime          @default(now())
+  model             UserUploadedModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, sortOrder])
+}
+
+model StyleTemplate {
+  id            String           @id @default(uuid()) @db.Uuid
+  slug          String           @unique
+  name          String
+  description   String?
+  thumbnailUrl  String
+  prompt        String?
+  category      TemplateCategory @default(ARTISTIC)
+  creditCost    Int              @default(30)
+  isActive      Boolean          @default(true)
+  isNsfw        Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  likeCount     Int              @default(0)
+  favoriteCount Int              @default(0)
+  usageCount    Int              @default(0)
+  favorites     Favorite[]
+  likes         Like[]
+
+  @@index([category])
+  @@index([createdAt])
+  @@index([isActive, sortOrder])
+  @@index([isNsfw])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid()) @db.Uuid
+  userId               String             @unique @db.Uuid
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime           @default(now())
+  currentPeriodEnd     DateTime?
+  cancelledAt          DateTime?
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  monthlyCredits       Int                @default(0)
+  creditsUsed          Int                @default(0)
+  // Chat token tracking — abstract from UI, powers credit deduction for paid plans
+  chatTokensAccumulated Int               @default(0)  // carry-over tokens not yet converted to a credit (Starter/Pro/Ultra)
+  // Free plan daily token cap — resets each day, never touches credits
+  chatDailyTokensUsed  Int                @default(0)
+  chatDailyResetAt     DateTime?                       // UTC midnight of the current daily window
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([plan])
+  @@index([status])
+}
+
+model PlanConfig {
+  id             String           @id @default(uuid()) @db.Uuid
+  planKey        SubscriptionPlan @unique
+  name           String
+  monthlyPrice   Float            @default(0)
+  annualPrice    Float            @default(0)
+  monthlyCredits Int              @default(0)
+  maxCompanions  Int              @default(1)
+  creditRollover  Int              @default(0)
+  // Chat token → credit conversion threshold (tokens needed to deduct 1 credit)
+  // 0 = unlimited (Premium). Computed as: ($1 in tokens) / ($1 in credits)
+  tokensPerCredit     Int              @default(16667)
+  // Daily token cap for Free plan (0 = no daily cap for paid plans)
+  dailyTokenLimit     Int              @default(0)
+  // Credits deducted per LoRA training job (0 = LoRA training not available on this plan)
+  loraTrainingCredits Int              @default(0)
+  features            Json?
+  isActive        Boolean          @default(true)
+  isRecommended   Boolean          @default(false)
+  sortOrder       Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model CreditTransaction {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  amount        Int      // negative = spend, positive = earn (rollover, purchase, subscription)
+  description   String   // human-readable label e.g. "Image Generation", "Monthly credits"
+  source        String   // 'usage' | 'purchase' | 'subscription' | 'adjustment'
+  category      String   // 'image' | 'video' | 'audio' | 'chat' | 'other' — drives chart
+  operationType String?  // e.g. 'IMAGE_GENERATION' — null for non-usage sources
+  occurredAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, occurredAt])
+  @@index([userId, category, occurredAt])
+  @@index([userId, source, occurredAt])
+}
+
+model CreditCost {
+  id            String   @id @default(uuid()) @db.Uuid
+  operationType String   @unique
+  label         String
+  category      String
+  credits       Int
+  description   String?
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model User {
+  id                                  String                  @id @default(uuid()) @db.Uuid
+  handle                              String?                 @unique
+  createdAt                           DateTime                @default(now())
+  updatedAt                           DateTime                @updatedAt
+  email                               String?                 @unique
+  role                                UserRole                @default(USER)
+  isAdmin                             Boolean                 @default(false)
+  emailVerified                       DateTime?
+  passwordHash                        String?
+  phone                               String?
+  avatarUrl                           String?
+  bannerUrl                           String?
+  bio                                 String?                 @db.VarChar(280)
+  avatarDecoration                    AvatarDecoration        @default(NONE)
+  avatarDecorationUrl                 String?
+  profileVisibility                   ProfileVisibility       @default(PUBLIC)
+  favoritesPublic                     Boolean                 @default(true)
+  isDeactivated                       Boolean                 @default(false)
+  emailNotifyMessages                 Boolean                 @default(true)
+  emailNotifyFollows                  Boolean                 @default(true)
+  emailNotifyProduct                  Boolean                 @default(true)
+  pushNotifyMessages                  Boolean                 @default(true)
+  pushNotifyFollows                   Boolean                 @default(true)
+  pushNotifyProduct                   Boolean                 @default(true)
+  enableNsfwContent                   Boolean                 @default(true)
+  discordHandle                       String?
+  twitterHandle                       String?
+  redditHandle                        String?
+  instagramHandle                     String?
+  websiteUrl                          String?
+  characters                          AICharacter[]
+  chatThreads                         ChatThread[]
+  communityComments                   CommunityFeedComment[]
+  communityItems                      CommunityFeedItem[]
+  communityReactions                  CommunityFeedReaction[]
+  favorites                           Favorite[]
+  followers                           Follow[]                @relation("Following")
+  following                           Follow[]                @relation("Followers")
+  generationJobs                      GenerationJob[]
+  creditTransactions                  CreditTransaction[]
+  likes                               Like[]
+  subscription                        Subscription?
+  blockedBy                           UserBlock[]             @relation("Blocked")
+  blockedUsers                        UserBlock[]             @relation("Blocker")
+  decorations                         UserDecoration[]
+  media                               UserMedia[]
+  uploadedModels                      UserUploadedModel[]
+  // Direct Messaging relations
+  dmConversations1                    DirectConversation[]    @relation("DMParticipant1")
+  dmConversations2                    DirectConversation[]    @relation("DMParticipant2")
+  directMessages                      DirectMessage[]
+  dmReadReceipts                      DirectMessageReadReceipt[]
+  presence                            UserPresence?
+  // Auth relations
+  accounts                            Account[]
+  sessions                            Session[]
+  refreshTokens                       RefreshToken[]
+
+  @@index([isDeactivated, createdAt])
+}
+
+// ============================================
+// Authentication Models
+// ============================================
+
+model Account {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @db.Uuid
+  provider          String   // google, discord, twitter, apple
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, expiresAt])
+  @@index([token])
+}
+
+model UserBlock {
+  id          String   @id @default(uuid()) @db.Uuid
+  blockerId   String   @db.Uuid
+  blockedId   String   @db.Uuid
+  createdAt   DateTime @default(now())
+  blockedUser User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  blockerUser User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+  @@index([blockedId, createdAt])
+  @@index([blockerId])
+  @@index([blockerId, createdAt])
+}
+
+model UserDecoration {
+  id           String     @id @default(uuid()) @db.Uuid
+  userId       String     @db.Uuid
+  decorationId String     @db.Uuid
+  isEquipped   Boolean    @default(false)
+  acquiredAt   DateTime   @default(now())
+  decoration   Decoration @relation(fields: [decorationId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, decorationId])
+  @@index([decorationId])
+  @@index([userId])
+  @@index([userId, isEquipped])
+}
+
+model UserMedia {
+  id                  String              @id @default(uuid()) @db.Uuid
+  userId              String              @db.Uuid
+  assetId             String              @db.Uuid
+  jobId               String?             @db.Uuid
+  title               String?
+  prompt              String?
+  visibility          UserMediaVisibility @default(PRIVATE)
+  isPostedToCommunity Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  asset               MediaAsset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  job                 GenerationJob?      @relation(fields: [jobId], references: [id])
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+  @@index([jobId])
+  @@index([userId, createdAt])
+  @@index([userId, isPostedToCommunity])
+  @@index([userId, visibility])
+  @@index([userId, visibility, createdAt])
+}
+
+model UserUploadedModel {
+  id                           String                         @id @default(uuid()) @db.Uuid
+  userId                       String                         @db.Uuid
+  slug                         String?                        @unique
+  name                         String
+  description                  String?
+  modelType                    ModelType
+  baseModel                    BaseModel
+  modelId                      String?                        @map("model_id")
+  loraModel                    String?                        @map("lora_model")
+  version                      String?
+  thumbnailUrl                 String?
+  downloadUrl                  String?
+  fileSize                     BigInt?
+  isPublic                     Boolean                        @default(false)
+  isNsfw                       Boolean                        @default(false)
+  downloads                    Int                            @default(0)
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  badge                        String?
+  favoriteCount                Int                            @default(0)
+  likeCount                    Int                            @default(0)
+  trainingEpochs               Int?
+  trainingSteps                Int?
+  triggerWord                  String?
+  usageCount                   Int                            @default(0)
+  usageTips                    String?
+  seoTitle                     String?
+  seoDescription               String?
+  tags                         String?
+  parentModelId                String?                        @db.Uuid
+  parentModel                  UserUploadedModel?             @relation("ModelVersions", fields: [parentModelId], references: [id], onDelete: SetNull)
+  childVersions                UserUploadedModel[]            @relation("ModelVersions")
+  checkpointModels             CommunityFeedCheckpointModel[]
+  loraLinks                    CommunityFeedItemLora[]
+  favorites                    Favorite[]
+  likes                        Like[]
+  characters                   AICharacter[]                  @relation("CharacterLora")
+  thumbnails                   ModelThumbnail[]
+  user                         User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([baseModel])
+  @@index([favoriteCount])
+  @@index([isPublic, createdAt])
+  @@index([likeCount])
+  @@index([modelType])
+  @@index([name])
+  @@index([parentModelId])
+  @@index([userId])
+}
+
+model VideoTemplate {
+  id                  String              @id @default(uuid()) @db.Uuid
+  slug                String              @unique
+  name                String
+  description         String?
+  thumbnailUrl        String
+  previewVideoUrl     String?
+  prompt              String
+  category            TemplateCategory    @default(MOTION)
+  videoGenerationType VideoGenerationType
+  creditCost          Int                 @default(100)
+  isActive            Boolean             @default(true)
+  isNsfw              Boolean             @default(false)
+  sortOrder           Int                 @default(0)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  likeCount           Int                 @default(0)
+  favoriteCount       Int                 @default(0)
+  usageCount          Int                 @default(0)
+  favorites           Favorite[]
+  likes               Like[]
+
+  @@index([category])
+  @@index([createdAt])
+  @@index([isActive, sortOrder])
+  @@index([isNsfw])
+  @@index([videoGenerationType])
+}
+
+model VideoModel {
+  id           String   @id @default(uuid()) @db.Uuid
+  modelId      String   @unique @map("model_id")
+  name         String
+  description  String?
+  thumbnailUrl String?  @map("thumbnail_url")
+  resolutions    String   @default("480")
+  pricingMatrix  Json?    @map("pricing_matrix")
+  supportsT2V  Boolean  @default(false) @map("supports_t2v")
+  supportsI2V  Boolean  @default(false) @map("supports_i2v")
+  durations    String   @default("5s")
+  isNew        Boolean  @default(false) @map("is_new")
+  isActive     Boolean  @default(true) @map("is_active")
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("video_models")
+}
+
+// ============================================
+// Direct Messaging (User-to-User)
+// ============================================
+
+model DirectConversation {
+  id                 String                       @id @default(uuid()) @db.Uuid
+  participant1Id     String                       @db.Uuid
+  participant2Id     String                       @db.Uuid
+  lastMessageAt      DateTime?
+  lastMessagePreview String?                      @db.VarChar(100)
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+
+  participant1       User                         @relation("DMParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2       User                         @relation("DMParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  messages           DirectMessage[]
+  readReceipts       DirectMessageReadReceipt[]
+
+  @@unique([participant1Id, participant2Id])
+  @@index([participant1Id, lastMessageAt])
+  @@index([participant2Id, lastMessageAt])
+}
+
+model DirectMessage {
+  id             String             @id @default(uuid()) @db.Uuid
+  conversationId String             @db.Uuid
+  senderId       String             @db.Uuid
+  content        String
+  isEdited       Boolean            @default(false)
+  isDeleted      Boolean            @default(false)
+  editedAt       DateTime?
+  createdAt      DateTime           @default(now())
+
+  conversation   DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User               @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@index([senderId, createdAt])
+}
+
+model DirectMessageReadReceipt {
+  id                String             @id @default(uuid()) @db.Uuid
+  conversationId    String             @db.Uuid
+  userId            String             @db.Uuid
+  lastReadAt        DateTime           @default(now())
+  lastReadMessageId String?            @db.Uuid
+
+  conversation      DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, lastReadAt])
+}
+
+model UserPresence {
+  userId     String         @id @db.Uuid
+  status     PresenceStatus @default(OFFLINE)
+  lastSeenAt DateTime       @default(now())
+  socketId   String?
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum AvatarDecoration {
+  NONE
+  PINK_GLOW
+  PURPLE_GLOW
+  GOLD_FRAME
+}
+
+enum BaseModel {
+  SD_1_5
+  SDXL
+  FLUX
+  PONY
+  ILLUSTRIOUS
+  Z_IMAGE_TURBO
+}
+
+enum BodyType {
+  SLIM
+  ATHLETIC
+  AVERAGE
+  CURVY
+  PLUS_SIZE
+}
+
+enum BreastSize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+enum ButtSize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+enum CharacterGender {
+  MALE
+  FEMALE
+  TRANS
+  OTHER
+}
+
+enum CharacterStyle {
+  REALISTIC
+  ANIME
+  SEMI_REALISTIC
+  CARTOON
+  FURRY
+  FANTASY
+}
+
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum DecorationType {
+  AVATAR_FRAME
+  AVATAR_GLOW
+  AVATAR_EFFECT
+  BANNER
+}
+
+enum Ethnicity {
+  ASIAN
+  BLACK
+  CAUCASIAN
+  HISPANIC
+  INDIAN
+  MIDDLE_EASTERN
+  MIXED
+  OTHER
+}
+
+enum FavoriteType {
+  IMAGE
+  VIDEO
+  MODEL
+  CHARACTER
+  COMMUNITY_ITEM
+  AI_APP
+  STYLE_TEMPLATE
+  VIDEO_TEMPLATE
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum JobProvider {
+  MODELSLAB
+  STABLE_DIFFUSION_API
+  REPLICATE
+  SEAART
+  CIVITAI
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum JobType {
+  TEXT_TO_SPEECH
+  IMAGE_GENERATION
+  VIDEO_GENERATION
+  VOICE_CLONING
+  IMAGE_EDIT
+  SOUND_EFFECT
+  VOICE_COVER
+  SONG_GENERATION
+  MUSIC_GENERATION
+  LORA_TRAINING
+  FACE_SWAP
+  DEEPFAKE_VIDEO
+}
+
+enum LikeType {
+  CHARACTER
+  COMMUNITY_ITEM
+  MODEL
+  AI_APP
+  STYLE_TEMPLATE
+  VIDEO_TEMPLATE
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum ModelType {
+  CHECKPOINT
+  LORA
+  EMBEDDING
+  VAE
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+  FRIENDS_ONLY
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPPORT
+  DEVELOPER
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PRO
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  EXPIRED
+  TRIALING
+}
+
+enum TemplateCategory {
+  TRANSFORMATION
+  ARTISTIC
+  ANIME
+  MOTION
+  EFFECTS
+  STYLE
+  CINEMATIC
+  SCENE
+  PORTRAIT
+  PRODUCT
+  FANTASY
+}
+
+enum UserMediaVisibility {
+  PUBLIC
+  PRIVATE
+  FOLLOWERS_ONLY
+}
+
+enum VideoGenerationType {
+  TEXT_TO_VIDEO
+  IMAGE_TO_VIDEO
+}
+
+enum PresenceStatus {
+  ONLINE
+  AWAY
+  OFFLINE
+}

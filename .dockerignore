@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.env.*
+.next
+node_modules
+npm-debug.log*
+README.md
+*.md
+.claude
+scraper
+agents
+__pycache__
+*.pyc
+*.py
+socket-server
